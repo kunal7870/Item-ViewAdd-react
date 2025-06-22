@@ -27,20 +27,34 @@ const AddItem = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  // Convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const coverImage = formData.coverImageFile
-      ? URL.createObjectURL(formData.coverImageFile)
-      : formData.coverImageUrl;
+    let coverImage = formData.coverImageUrl;
 
-    const additionalImages = [
-      ...formData.additionalImageFiles.map((file) => URL.createObjectURL(file)),
-      ...formData.additionalImageUrls
-        .split(',')
-        .map((url) => url.trim())
-        .filter((url) => url),
-    ];
+    // If file is selected, convert to base64
+    if (formData.coverImageFile) {
+      coverImage = await fileToBase64(formData.coverImageFile);
+    }
+
+    const additionalImageFiles = await Promise.all(
+      formData.additionalImageFiles.map(file => fileToBase64(file))
+    );
+
+    const additionalImageUrls = formData.additionalImageUrls
+      .split(',')
+      .map((url) => url.trim())
+      .filter(Boolean);
 
     const newItem = {
       id: Date.now(),
@@ -48,7 +62,7 @@ const AddItem = () => {
       type: formData.type,
       description: formData.description,
       coverImage,
-      additionalImages,
+      additionalImages: [...additionalImageFiles, ...additionalImageUrls],
     };
 
     const existing = JSON.parse(localStorage.getItem('items') || '[]');

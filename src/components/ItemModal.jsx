@@ -32,7 +32,7 @@ export default function ItemModal({ item, onClose }) {
         </Carousel>
 
         <button
-          className="mt-6 text-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="mt-6 mx-auto block text-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           onClick={() => alert('Enquiry sent!')}
         >
           Enquire
